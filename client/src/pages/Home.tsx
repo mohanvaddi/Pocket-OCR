@@ -22,6 +22,8 @@ import AppContext from './../context/AppContext';
 import { Redirect } from 'react-router-dom';
 import { Layout } from '../layout/Layout';
 import { UploadTab } from '../components/UploadTab';
+import { OnlineTab } from '../components/OnlineTab';
+import { RecentTab } from '../components/RecentTab';
 
 interface StudentHomeProps {}
 
@@ -34,15 +36,20 @@ export const Home: React.FC<StudentHomeProps> = () => {
         return (
             <Layout>
                 <Container maxW='container.xl' p={0}>
-                    <VStack padding={[5, 8, 12]} minH={'100vh'}>
+                    <VStack
+                        // padding={[5, 8, 12]}
+                        minH={'100vh'}>
                         <Stack width='full' h='full'>
-                            <Tabs isLazy>
+                            <Tabs>
                                 <TabList>
                                     <Tab _selected={{ color: 'brand.500' }}>
                                         Upload
                                     </Tab>
                                     <Tab _selected={{ color: 'brand.500' }}>
                                         Online
+                                    </Tab>
+                                    <Tab _selected={{ color: 'brand.500' }}>
+                                        Recent
                                     </Tab>
                                 </TabList>
 
@@ -51,7 +58,10 @@ export const Home: React.FC<StudentHomeProps> = () => {
                                         <UploadTab />
                                     </TabPanel>
                                     <TabPanel>
-                                        <p>two!</p>
+                                        <OnlineTab />
+                                    </TabPanel>
+                                    <TabPanel padding={0}>
+                                        <RecentTab />
                                     </TabPanel>
                                 </TabPanels>
                             </Tabs>

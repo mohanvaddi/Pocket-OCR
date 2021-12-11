@@ -52,7 +52,7 @@ export const Header: React.FC<HeaderProps> = (props) => {
         <Box px={4}>
             <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
                 <Box>
-                    <Heading fontSize={['xl']}>OCR Online</Heading>
+                    <Heading fontSize={['xl']}>Pocket OCR</Heading>
                 </Box>
 
                 <Flex alignItems={'center'}>

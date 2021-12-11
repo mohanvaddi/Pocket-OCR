@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
     GridItem,
     FormControl,
@@ -9,41 +9,34 @@ import {
     ButtonProps,
     Text,
     Box,
+    Input,
+    useBreakpointValue,
 } from '@chakra-ui/react';
-import { DropZone } from './DropZone';
+
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Formik, Form } from 'formik';
-import AppContext from './../context/AppContext';
-interface UploadTabProps {}
+interface OnlineTabProps {}
 
 const MotionButton = motion<ButtonProps>(Button);
-export const UploadTab: React.FC<UploadTabProps> = () => {
-    const { state } = useContext(AppContext);
+export const OnlineTab: React.FC<OnlineTabProps> = () => {
+    const colspan = useBreakpointValue({ base: 2, md: 1 });
     const [data, setData] = useState<string | null>(null);
 
     return (
         <Formik
-            initialValues={{ lang: 'eng', file: [] }}
+            initialValues={{ lang: 'eng', imgLink: '' }}
             onSubmit={async (values) => {
-                // if no files are uploaded
-                if (values.file.length === 0) {
+                if (values.imgLink.trim().length === 0) {
                     return;
                 }
+                console.log(values);
 
-                const formData = new FormData();
-                for (let i = 0; i < values.file.length; i++) {
-                    formData.append('file', values.file[i]);
-                }
-                formData.append('lang', values.lang);
                 const resp = await axios.post(
-                    'http://localhost:4000/upload',
-                    formData,
+                    'http://localhost:4000/usingLink',
                     {
-                        headers: {
-                            'x-auth-token': state.user.token,
-                            'Content-Type': 'multipart/form-data',
-                        },
+                        lang: values.lang,
+                        imgLink: values.imgLink,
                     }
                 );
                 console.log(resp);
@@ -52,13 +45,23 @@ export const UploadTab: React.FC<UploadTabProps> = () => {
             {({ values, errors, isValid, isSubmitting, handleChange }) => (
                 <Form>
                     <VStack spacing={4}>
-                        <DropZone name='file' />
                         <SimpleGrid
                             columns={2}
                             columnGap={3}
                             rowGap={6}
                             w='full'>
-                            <GridItem colSpan={1}>
+                            <GridItem colSpan={colspan}>
+                                <FormControl>
+                                    <Input
+                                        placeholder='Paste Image link here..'
+                                        value={values.imgLink}
+                                        onChange={handleChange}
+                                        name='imgLink'
+                                        id='imgLink'
+                                    />
+                                </FormControl>
+                            </GridItem>
+                            <GridItem colSpan={colspan}>
                                 <FormControl>
                                     <Select
                                         value={values.lang}

@@ -1,11 +1,19 @@
 import React from 'react';
 
+export interface RecentItem {
+    type: 'upload' | 'link';
+    imageLink: string;
+    pdfLink: string;
+    date: Date;
+}
+
 export interface UserInterface {
     id: string;
     name: string;
     email: string;
     role: string;
     token: string;
+    recent: RecentItem[];
     isLoggedIn: boolean;
 }
 const user: UserInterface = {
@@ -14,6 +22,7 @@ const user: UserInterface = {
     email: '',
     role: '',
     token: '',
+    recent: [],
     isLoggedIn: false,
 };
 

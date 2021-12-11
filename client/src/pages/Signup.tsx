@@ -11,9 +11,9 @@ import {
     ButtonProps,
     Heading,
 } from '@chakra-ui/react';
-
 import { Redirect } from 'react-router-dom';
 import { EmailIcon, UnlockIcon } from '@chakra-ui/icons';
+import { FaUserCircle } from 'react-icons/fa';
 import React, {
     useRef,
     useContext,
@@ -41,12 +41,19 @@ interface isValidTokenInterface extends isValidTokenResponseInterface {
     token: string;
 }
 
-export const Login: React.FC = () => {
+export const Signup: React.FC = () => {
+    const nameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
     const passwdRef = useRef<HTMLInputElement>(null);
+    const cnfPasswdRef = useRef<HTMLInputElement>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [notification, setNotification] = useState('');
 
     const ctx = useContext(AppContext);
+
+    useEffect(() => {
+        
+    }, [notification])
 
     const isTokenValid = useCallback(async (): Promise<
         isValidTokenInterface | false
@@ -92,13 +99,34 @@ export const Login: React.FC = () => {
 
     const onLoginHandler = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const name = nameRef.current?.value.trim();
+        const email = emailRef.current?.value.trim();
+        const passwd = passwdRef.current?.value.trim();
+        const cnfPasswd = cnfPasswdRef.current?.value.trim();
+
+        //Validating the form
+        if (name === '') {
+            return;
+        }
+        if (email === '') {
+            return;
+        }
+        if (passwd === '') {
+            return;
+        }
+
         const data = {
-            email: emailRef.current?.value,
-            password: passwdRef.current?.value,
+            name,
+            email,
+            passwd,
         };
+
+        
+
         try {
             const response: LoginResponseInterface = await axios.post(
-                'http://localhost:4000/api/auth',
+                'http://localhost:4000/api/users',
                 {
                     ...data,
                 }
@@ -136,38 +164,53 @@ export const Login: React.FC = () => {
                 <form onSubmit={onLoginHandler}>
                     <Stack spacing={5} marginTop={24} w='sm'>
                         <Stack w='full' align='center'>
-                            <Heading fontSize='2xl' color='brand.300'>Login to Pocket OCR</Heading>
+                            <Heading fontSize='2xl' color='brand.300'>
+                                Signup to Pocket OCR
+                            </Heading>
                         </Stack>
+                        <FormControl id='name'>
+                            <FormLabel>Name</FormLabel>
+                            <InputGroup>
+                                <InputLeftElement children={<FaUserCircle />} />
+                                <Input ref={nameRef} type='text' isRequired />
+                            </InputGroup>
+                        </FormControl>
                         <FormControl id='email'>
                             <FormLabel>Email</FormLabel>
                             <InputGroup>
                                 <InputLeftElement children={<EmailIcon />} />
-                                <Input
-                                    // variant='flushed'
-                                    ref={emailRef}
-                                    type='email'
-                                    isRequired
-                                />
+                                <Input ref={emailRef} type='email' isRequired />
                             </InputGroup>
                         </FormControl>
                         <FormControl id='password'>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>New Password</FormLabel>
                             <InputGroup>
                                 <InputLeftElement children={<UnlockIcon />} />
                                 <Input
-                                    // variant='flushed'
                                     ref={passwdRef}
                                     type='password'
                                     isRequired
                                 />
                             </InputGroup>
                         </FormControl>
+                        <FormControl id='cnfPasswd'>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <InputGroup>
+                                <InputLeftElement children={<UnlockIcon />} />
+                                <Input
+                                    ref={cnfPasswdRef}
+                                    type='password'
+                                    isRequired
+                                />
+                            </InputGroup>
+                        </FormControl>
+
                         <MotionButton
                             type='submit'
                             variant='primary'
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}>
-                            Login
+                            Signup
                         </MotionButton>
                     </Stack>
                 </form>

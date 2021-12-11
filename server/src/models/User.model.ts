@@ -1,5 +1,12 @@
 import mongoose, { Document } from 'mongoose';
 
+export interface RecentItem {
+    type: 'upload' | 'link';
+    imageLink: string;
+    pdfLink: string;
+    date?: Date;
+}
+
 export interface UserInterface extends Document {
     name: string;
     email: string;
@@ -7,6 +14,7 @@ export interface UserInterface extends Document {
     password: string;
     avatar?: string;
     date?: any;
+    recent?: RecentItem[];
 }
 
 const UserSchema = new mongoose.Schema<UserInterface>({
@@ -36,6 +44,24 @@ const UserSchema = new mongoose.Schema<UserInterface>({
         type: Date,
         default: Date.now,
     },
+    recent: [
+        {
+            type: {
+                type: String,
+                enum: ['upload', 'link'],
+            },
+            imageLink: {
+                type: String,
+            },
+            pdfLink: {
+                type: String,
+            },
+            date: {
+                type: Date,
+                default: Date.now,
+            },
+        },
+    ],
 });
 
 export default mongoose.model<UserInterface>('User', UserSchema);

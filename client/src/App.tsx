@@ -4,6 +4,7 @@ import { Switch, Route } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { NotFound } from './pages/NotFound';
+import { Signup } from './pages/Signup';
 
 interface AppProps {}
 export const App: React.FC<AppProps> = () => {
@@ -22,7 +23,10 @@ export const App: React.FC<AppProps> = () => {
         <Fragment>
             <Global styles={GlobalStyles} />
             <Switch>
-                <Route path='/' exact>
+                <Route path='/signup' exact>
+                    <Signup />
+                </Route>
+                <Route path='/login' exact>
                     <Login />
                 </Route>
                 <Route path='/home' exact>
