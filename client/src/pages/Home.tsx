@@ -49,7 +49,7 @@ export const Home: React.FC<StudentHomeProps> = () => {
                                         Online
                                     </Tab>
                                     <Tab _selected={{ color: 'brand.500' }}>
-                                        Recent
+                                        History
                                     </Tab>
                                 </TabList>
 

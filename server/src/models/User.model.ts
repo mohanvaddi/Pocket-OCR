@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema<UserInterface>({
         {
             type: {
                 type: String,
-                enum: ['upload', 'link'],
+                enum: ['upload', 'online'],
             },
             imageLink: {
                 type: String,

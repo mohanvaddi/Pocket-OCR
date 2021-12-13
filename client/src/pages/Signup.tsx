@@ -10,9 +10,15 @@ import {
     InputLeftElement,
     ButtonProps,
     Heading,
+    HStack,
+    Spacer,
+    Text,
+    InputRightElement,
+    Link,
 } from '@chakra-ui/react';
+import { Link as reactlink } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
-import { EmailIcon, UnlockIcon } from '@chakra-ui/icons';
+import { EmailIcon, UnlockIcon, CheckIcon } from '@chakra-ui/icons';
 import { FaUserCircle } from 'react-icons/fa';
 import React, {
     useRef,
@@ -25,6 +31,7 @@ import { motion } from 'framer-motion';
 import axios, { AxiosResponse } from 'axios';
 import AppContext from '../context/AppContext';
 import { LoadingModal } from '../components/LoadingModal';
+import { isElementAccessExpression } from 'typescript';
 const MotionButton = motion<ButtonProps>(Button);
 
 interface LoginResponseInterface extends AxiosResponse {
@@ -44,16 +51,20 @@ interface isValidTokenInterface extends isValidTokenResponseInterface {
 export const Signup: React.FC = () => {
     const nameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
-    const passwdRef = useRef<HTMLInputElement>(null);
-    const cnfPasswdRef = useRef<HTMLInputElement>(null);
+
     const [isLoading, setIsLoading] = useState(false);
-    const [notification, setNotification] = useState('');
+    const [passwdCheckFailed, setPasswdCheckFailed] = useState(false);
+
+    // for passwd validation
+    const [passwd, setPasswd] = useState('');
+    const [cnfPasswd, setCnfPasswd] = useState('');
+    const [passwdIsValid, setPasswdIsValid] = useState(false);
+    const [cnfPasswdIsValid, setCnfPasswdIsValid] = useState(false);
+
+    const [emailIsValid, setEmailIsValid] = useState(false);
+    const [nameIsValid, setNameIsValid] = useState(false);
 
     const ctx = useContext(AppContext);
-
-    useEffect(() => {
-        
-    }, [notification])
 
     const isTokenValid = useCallback(async (): Promise<
         isValidTokenInterface | false
@@ -102,8 +113,6 @@ export const Signup: React.FC = () => {
 
         const name = nameRef.current?.value.trim();
         const email = emailRef.current?.value.trim();
-        const passwd = passwdRef.current?.value.trim();
-        const cnfPasswd = cnfPasswdRef.current?.value.trim();
 
         //Validating the form
         if (name === '') {
@@ -116,13 +125,15 @@ export const Signup: React.FC = () => {
             return;
         }
 
+        if (passwd !== cnfPasswd) {
+            return;
+        }
+
         const data = {
             name,
             email,
-            passwd,
+            password: passwd,
         };
-
-        
 
         try {
             const response: LoginResponseInterface = await axios.post(
@@ -162,7 +173,7 @@ export const Signup: React.FC = () => {
         return (
             <Flex minH={'100vh'} align={'flex-start'} justify={'center'}>
                 <form onSubmit={onLoginHandler}>
-                    <Stack spacing={5} marginTop={24} w='sm'>
+                    <Stack spacing={4} marginTop={24} w='sm'>
                         <Stack w='full' align='center'>
                             <Heading fontSize='2xl' color='brand.300'>
                                 Signup to Pocket OCR
@@ -172,14 +183,53 @@ export const Signup: React.FC = () => {
                             <FormLabel>Name</FormLabel>
                             <InputGroup>
                                 <InputLeftElement children={<FaUserCircle />} />
-                                <Input ref={nameRef} type='text' isRequired />
+                                <Input
+                                    ref={nameRef}
+                                    onChange={(e) => {
+                                        if (e.target.value.trim().length >= 3) {
+                                            setNameIsValid(true);
+                                        } else {
+                                            setNameIsValid(false);
+                                        }
+                                    }}
+                                    type='text'
+                                    isRequired
+                                />
+                                {nameIsValid && (
+                                    <InputRightElement
+                                        children={
+                                            <CheckIcon color='green.500' />
+                                        }
+                                    />
+                                )}
                             </InputGroup>
                         </FormControl>
                         <FormControl id='email'>
                             <FormLabel>Email</FormLabel>
                             <InputGroup>
                                 <InputLeftElement children={<EmailIcon />} />
-                                <Input ref={emailRef} type='email' isRequired />
+                                <Input
+                                    ref={emailRef}
+                                    onChange={(e) => {
+                                        const emailRegex =
+                                            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+                                        if (e.target.value.match(emailRegex)) {
+                                            setEmailIsValid(true);
+                                        } else {
+                                            setEmailIsValid(false);
+                                        }
+                                    }}
+                                    type='email'
+                                    isRequired
+                                />
+                                {emailIsValid && (
+                                    <InputRightElement
+                                        children={
+                                            <CheckIcon color='green.500' />
+                                        }
+                                    />
+                                )}
                             </InputGroup>
                         </FormControl>
                         <FormControl id='password'>
@@ -187,10 +237,26 @@ export const Signup: React.FC = () => {
                             <InputGroup>
                                 <InputLeftElement children={<UnlockIcon />} />
                                 <Input
-                                    ref={passwdRef}
                                     type='password'
+                                    onChange={(e) => {
+                                        console.log(e.target.value);
+                                        setPasswd(e.target.value);
+                                        if (e.target.value.trim().length >= 8) {
+                                            setPasswdIsValid(true);
+                                        } else {
+                                            setPasswdIsValid(false);
+                                        }
+                                    }}
+                                    value={passwd}
                                     isRequired
                                 />
+                                {passwdIsValid && (
+                                    <InputRightElement
+                                        children={
+                                            <CheckIcon color='green.500' />
+                                        }
+                                    />
+                                )}
                             </InputGroup>
                         </FormControl>
                         <FormControl id='cnfPasswd'>
@@ -198,13 +264,48 @@ export const Signup: React.FC = () => {
                             <InputGroup>
                                 <InputLeftElement children={<UnlockIcon />} />
                                 <Input
-                                    ref={cnfPasswdRef}
+                                    onChange={(e) => {
+                                        console.log(e.target.value);
+                                        setCnfPasswd(e.target.value);
+                                        if (e.target.value === passwd) {
+                                            setCnfPasswdIsValid(true);
+                                        } else {
+                                            setCnfPasswdIsValid(false);
+                                        }
+                                    }}
                                     type='password'
+                                    value={cnfPasswd}
                                     isRequired
                                 />
+                                {cnfPasswdIsValid && (
+                                    <InputRightElement
+                                        children={
+                                            <CheckIcon color='green.500' />
+                                        }
+                                    />
+                                )}
                             </InputGroup>
                         </FormControl>
 
+                        {/* <HStack w='full' alignContent={'center'}>
+                            <Text w='full' align={'center'} color='red.300'>
+                                Passwords doesn't match
+                            </Text>
+                        </HStack> */}
+
+                        <HStack w='full'>
+                            <Spacer />
+                            <Text>
+                                Registered User? &nbsp;
+                                <Button
+                                    as={reactlink}
+                                    to='/'
+                                    color='brand.200'
+                                    variant='link'>
+                                    Login
+                                </Button>
+                            </Text>
+                        </HStack>
                         <MotionButton
                             type='submit'
                             variant='primary'

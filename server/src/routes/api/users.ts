@@ -76,7 +76,16 @@ router.post(
                 },
                 (err, token) => {
                     if (err) throw err;
-                    return res.json({ token });
+                    return res.json({
+                        token,
+                        user: {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email,
+                            role: user.role,
+                            recent: user.recent,
+                        },
+                    });
                 }
             );
         } catch (err) {

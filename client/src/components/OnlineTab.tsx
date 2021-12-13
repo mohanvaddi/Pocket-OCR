@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
     GridItem,
     FormControl,
@@ -12,22 +12,33 @@ import {
     Input,
     useBreakpointValue,
 } from '@chakra-ui/react';
-
+import { PartialLoadingModal } from './PartialLoadingModal';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import AppContext from '../context/AppContext';
 import { Formik, Form } from 'formik';
+import { ClipboardCopy } from './ClipboardCopy';
+
 interface OnlineTabProps {}
 
 const MotionButton = motion<ButtonProps>(Button);
 export const OnlineTab: React.FC<OnlineTabProps> = () => {
+    const { state } = useContext(AppContext);
     const colspan = useBreakpointValue({ base: 2, md: 1 });
     const [data, setData] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean | null>(null);
+
+    if (isLoading) {
+        return <PartialLoadingModal />;
+    }
 
     return (
         <Formik
             initialValues={{ lang: 'eng', imgLink: '' }}
             onSubmit={async (values) => {
+                setIsLoading(true);
                 if (values.imgLink.trim().length === 0) {
+                    setIsLoading(false);
                     return;
                 }
                 console.log(values);
@@ -37,10 +48,17 @@ export const OnlineTab: React.FC<OnlineTabProps> = () => {
                     {
                         lang: values.lang,
                         imgLink: values.imgLink,
+                    },
+                    {
+                        headers: {
+                            'x-auth-token': state.user.token,
+                        },
                     }
                 );
+
                 console.log(resp);
                 setData(resp.data);
+                setIsLoading(false);
             }}>
             {({ values, errors, isValid, isSubmitting, handleChange }) => (
                 <Form>
@@ -91,6 +109,13 @@ export const OnlineTab: React.FC<OnlineTabProps> = () => {
                                 <GridItem colSpan={2}>
                                     <Box as='div' p='4' borderRadius='3px'>
                                         <Text fontSize='xl'>{data}</Text>
+                                    </Box>
+                                </GridItem>
+                            )}
+                            {data && (
+                                <GridItem colSpan={2}>
+                                    <Box as='div' p='4' borderRadius='3px'>
+                                        <ClipboardCopy text={data} />
                                     </Box>
                                 </GridItem>
                             )}

@@ -134,7 +134,7 @@ app.post(
     }
 );
 
-app.post('/usingLink', (req: Request, res: Response) => {
+app.post('/usingLink', auth, (req: Request | any, res: Response) => {
     const worker: customTesseractWorker = createWorker({
         logger: (m) => console.log(m),
     });
@@ -174,10 +174,36 @@ app.post('/usingLink', (req: Request, res: Response) => {
                 console.log('Image not found');
             }
 
+            let pdfLink = '';
             if (worker.getPDF) {
                 const { data } = await worker.getPDF('Tesseract OCR Result');
-                fs.writeFileSync('tesseract-ocr-result.pdf', Buffer.from(data));
+                const pdfFile = dUriPdf(Buffer.from(data)).content;
+                const result = await cloudinary.uploader.upload(
+                    pdfFile as string,
+                    {
+                        folder: 'project-ocr-pdfs',
+                    }
+                );
+                console.log(result);
+                pdfLink = result.secure_url;
             }
+            const user = await UserModel.findByIdAndUpdate(
+                req.user.id,
+                {
+                    $push: {
+                        recent: {
+                            type: 'online',
+                            imageLink: imgLink,
+                            pdfLink: pdfLink,
+                        },
+                    },
+                },
+                {
+                    upsert: true,
+                }
+            );
+            console.log(user);
+            console.log(user?.recent);
         })();
     } catch (err) {
         console.log('Unable to upload to the server');
@@ -185,8 +211,16 @@ app.post('/usingLink', (req: Request, res: Response) => {
     }
 });
 
-app.get('/download', (_req: Request, res: Response) => {
-    res.download(path.join(__dirname, '../tesseract-ocr-result.pdf'));
+app.get('/getRecents', auth, async (req: Request | any, res: Response) => {
+    const user = await UserModel.findById(req.user.id);
+    if (user) {
+        return res.status(200).json(user?.recent);
+    }
+    return res.status(400).send('Bad Request!');
+});
+
+app.get('/check', (_req: Request, res: Response) => {
+    res.status(400).send('Server Working!');
 });
 
 app.get('*', (_req: Request, res: Response) => {

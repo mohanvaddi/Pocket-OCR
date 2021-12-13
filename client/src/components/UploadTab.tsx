@@ -15,19 +15,28 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Formik, Form } from 'formik';
 import AppContext from './../context/AppContext';
+import { PartialLoadingModal } from './PartialLoadingModal';
+import { ClipboardCopy } from './ClipboardCopy';
 interface UploadTabProps {}
 
 const MotionButton = motion<ButtonProps>(Button);
 export const UploadTab: React.FC<UploadTabProps> = () => {
     const { state } = useContext(AppContext);
     const [data, setData] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean | null>(null);
+
+    if (isLoading) {
+        return <PartialLoadingModal />;
+    }
 
     return (
         <Formik
             initialValues={{ lang: 'eng', file: [] }}
             onSubmit={async (values) => {
+                setIsLoading(true);
                 // if no files are uploaded
                 if (values.file.length === 0) {
+                    setIsLoading(false);
                     return;
                 }
 
@@ -48,6 +57,7 @@ export const UploadTab: React.FC<UploadTabProps> = () => {
                 );
                 console.log(resp);
                 setData(resp.data);
+                setIsLoading(false);
             }}>
             {({ values, errors, isValid, isSubmitting, handleChange }) => (
                 <Form>
@@ -83,11 +93,17 @@ export const UploadTab: React.FC<UploadTabProps> = () => {
                                     </MotionButton>
                                 </FormControl>
                             </GridItem>
-
                             {data && (
                                 <GridItem colSpan={2}>
                                     <Box as='div' p='4' borderRadius='3px'>
                                         <Text fontSize='xl'>{data}</Text>
+                                    </Box>
+                                </GridItem>
+                            )}
+                            {data && (
+                                <GridItem colSpan={2}>
+                                    <Box as='div' p='4' borderRadius='3px'>
+                                        <ClipboardCopy text={data} />
                                     </Box>
                                 </GridItem>
                             )}

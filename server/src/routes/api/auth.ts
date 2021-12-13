@@ -81,6 +81,7 @@ router.post(
                     role: user.role,
                 },
             };
+
             jwt.sign(
                 payload,
                 process.env['JWT_SECRET'] as string,

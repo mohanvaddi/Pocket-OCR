@@ -35,7 +35,9 @@ type AppState = typeof initialState;
 type Action =
     | { type: 'SET_USER'; payload: UserInterface }
     | { type: 'SET_LOGGEDIN'; payload: boolean }
-    | { type: 'SET_TOKEN'; payload: string };
+    | { type: 'SET_TOKEN'; payload: string }
+    | { type: 'SET_RECENTS'; payload: RecentItem[] }
+    ;
 
 const AppContext = React.createContext<{
     state: AppState;
@@ -65,6 +67,14 @@ const reducer = (state: AppState, action: Action) => {
                     token: action.payload,
                 },
             };
+        case 'SET_RECENTS':
+            return {
+                ...state,
+                user:{
+                    ...state.user,
+                    recent: action.payload
+                }
+            }
         default:
             return state;
     }

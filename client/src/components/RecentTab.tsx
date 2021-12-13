@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
     VStack,
     Box,
@@ -14,8 +14,10 @@ import {
     Button,
     Flex,
     Stack,
+    IconButton,
 } from '@chakra-ui/react';
-
+import axios from 'axios';
+import { FaHistory } from 'react-icons/fa';
 import { RecentItem } from './../context/AppContext';
 import AppContext from './../context/AppContext';
 
@@ -40,7 +42,6 @@ interface ReactTabItemProps {
     recent: RecentItem;
 }
 export const RecentTabItem: React.FC<ReactTabItemProps> = ({ recent }) => {
-    console.log('render');
     return (
         <AccordionItem>
             <h2>
@@ -111,16 +112,34 @@ interface RecentTabProps {}
 
 export const RecentTab: React.FC<RecentTabProps> = ({}) => {
     const { state } = useContext(AppContext);
-    const Recents = state.user.recent;
+    const [recents, setRecents] = useState(state.user.recent);
 
+    const getRecentsHandler = () => {
+        (async () => {
+            const resp = await axios.get('http://localhost:4000/getRecents', {
+                headers: {
+                    'x-auth-token': state.user.token,
+                },
+            });
+            console.log(resp.data);
+            setRecents(resp.data);
+        })();
+    };
     return (
-        <VStack w='full' alignItems='flex-start' p={0} spacing={6}>
-            {JSON.stringify(Recents)}
-            <Accordion w='full' defaultIndex={[0]} allowMultiple>
-                {[...Recents].reverse().map((item, idx) => (
-                    <RecentTabItem key={idx} recent={item} />
-                ))}
-            </Accordion>
-        </VStack>
+        <>
+            <HStack w='full' spacing={10} padding={1} pr={[2, 4, 6]}>
+                <Spacer />
+                <Button onClick={getRecentsHandler} variant={'link'}>
+                    Refresh
+                </Button>
+            </HStack>
+            <VStack w='full' alignItems='flex-start' p={0} spacing={0}>
+                <Accordion w='full' defaultIndex={[0]} allowMultiple>
+                    {[...recents].reverse().map((item, idx) => (
+                        <RecentTabItem key={idx} recent={item} />
+                    ))}
+                </Accordion>
+            </VStack>
+        </>
     );
 };
